@@ -20,6 +20,28 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+
+    /*
+    Definição de Contextos (createContext):
+
+        /register:
+        Define um endpoint para registrar novas tarefas. Quando uma requisição é
+        feita para http://localhost:8080/register, o método handleRegisterUser será chamado
+        para processar a requisição.
+
+        /task:
+        Define um endpoint para listar todas as tarefas. Quando uma requisição é feita para
+        http://localhost:8080/task, o método handleListTasks será chamado para processar a
+        requisição.
+
+        server.setExecutor(null):
+            Define o executor como null, o que significa que o servidor usará um executor
+            padrão (um único thread) para processar as requisições.
+
+        server.start(): Inicia o servidor HTTP.
+
+    */
+
     public void startServer() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
@@ -32,6 +54,19 @@ public class TaskController {
         System.out.println("Servidor rodando em http://localhost:8080/");
     }
 
+
+    /*
+    HttpExchange:
+        O objeto HttpExchange contém todas as informações sobre a requisição HTTP (como o
+        método HTTP, cabeçalhos, corpo da requisição, etc.) e permite que você envie uma
+        resposta de volta ao cliente.
+
+    O método sendResponseHeaders envia o código de status HTTP 200 (OK) e o tamanho da
+    resposta em bytes.
+
+    O corpo da resposta é escrito no OutputStream do HttpExchange para ser enviado de volta
+    ao cliente.
+    */
 
     private void handleListTasks(HttpExchange exchange) throws IOException {
 
@@ -57,6 +92,27 @@ public class TaskController {
 
     }
 
+
+
+    /*
+    O método lê o corpo da requisição HTTP, que contém os dados enviados pelo cliente.
+    Ele usa exchange.getRequestBody().readAllBytes() para capturar os dados brutos e os
+    converte para uma string.
+
+    A string query contém os parâmetros enviados pelo cliente (provavelmente no formato
+    description=...&dateTimeFrame=...). Esses parâmetros são divididos e extraídos:
+
+    description: O valor da descrição da tarefa.
+
+    dateTimeString: O valor do timestamp da tarefa (como string).
+
+    O dateTimeString é convertido para um LocalDateTime (formato de data e hora) usando
+    LocalDateTime.parse(dateTimeString).
+
+    O método chama taskService.registerTask(description, datetimeFrame) para registrar a nova
+    tarefa. A camada de serviço se encarregará de salvar a tarefa no banco de dados (através
+    do repositório).
+    */
     private void handleRegisterUser(HttpExchange exchange) throws IOException {
         if ("POST".equals(exchange.getRequestMethod())) {
             String query = new String(exchange.getRequestBody().readAllBytes());
